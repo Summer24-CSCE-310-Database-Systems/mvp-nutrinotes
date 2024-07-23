@@ -18,3 +18,6 @@ This will be a web-based application that will allow users to log what foods and
 - Users can share their opinion on different foods.
 - Users can log their goals and progress of the diet.
 - (Stretch Goal) Users can generate a diet plan based on their preferred foods.
+
+# Database Design
+ ![Database Schema](docs/database.png)
