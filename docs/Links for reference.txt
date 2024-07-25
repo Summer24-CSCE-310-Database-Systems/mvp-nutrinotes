@@ -1,0 +1,29 @@
+Links for reference
+https://www.youtube.com/watch?v=RdPYA-wDhTA&ab_channel=DatabaseStar
+https://www.youtube.com/watch?v=qECVC6t_2mU&ab_channel=Randomcode
+https://stackoverflow.com/questions/21122598/postgres-user-does-not-exist
+
+
+docker run --name nutrinotes-postgres -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres
+
+Access the docker container
+docker exec -it 8a4673917e7b /bin/bash
+
+docker inspect 8a4673917e7b | grep -i "env"
+
+psql -d postgres -U admin
+
+\c nutrinotes
+
+Continuation notes:
+Study flask and create the backend. Perhaps use python. 
+
+Steps to run app: #Doby's method. Could be different for you
+Go to conda terminal
+Go to repo directory
+conda env create -f environment.yml
+conda activate nutrinotes
+flask shell
+db.create_all()
+Leave shell
+flask run
