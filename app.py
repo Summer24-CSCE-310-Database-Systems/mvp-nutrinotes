@@ -176,3 +176,31 @@ def userdelete():
 
     return deleteuser(feedback_message='Successfully deleted user {}'.format(userForm),
                        feedback_type=True)
+
+#CRUD FOR FOOD
+
+#CREATE
+@app.route("/food")
+def foodinfo(feedback_message=None, feedback_type=False):
+    return render_template("food.html",
+            feedback_message=feedback_message, 
+            feedback_type=feedback_type)
+
+@app.route("/foodcreate", methods=['POST'])
+def foodcreate():
+    Name = request.form["Name"]
+    Calories = request.form["Calories"]
+
+    try:
+        entry = Food(Name=Name, Calories=Calories)
+        db.session.add(entry)
+        db.session.commit()
+    except exc.IntegrityError as err:
+        db.session.rollback()
+        return foodinfo(feedback_message='A food named {} already exists. Create a food with a different name.'.format(Name), feedback_type=False)
+    except Exception as err:
+        db.session.rollback()
+        return foodinfo(feedback_message='Database error: {}'.format(err), feedback_type=False)
+    
+    return foodinfo(feedback_message='Successfully added food {}'.format(Name),
+                       feedback_type=True)
