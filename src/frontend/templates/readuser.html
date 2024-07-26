@@ -1,0 +1,14 @@
+<h2>Read users</h2> 
+
+<table>
+    <tr>
+        <th>Name</th>
+    </tr>
+    {% for Username in userlist %}
+    <tr>
+        <td>{{ Username }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<a href="/user"><button> Go back </button></a>

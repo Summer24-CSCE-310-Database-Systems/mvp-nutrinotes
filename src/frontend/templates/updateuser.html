@@ -1,0 +1,30 @@
+<h2>Update Chef</h2>
+
+{% if feedback_message != None %}
+    {% if feedback_type %}
+        <span style="color:green">{{feedback_message}}</span>
+    {% else %}
+    <span style="color:red">{{feedback_message}}</span>
+    {% endif %}
+{% endif %}
+
+<form action="{{ url_for('userupdate')}}" method="post">
+  <label for="allusers">Select a user to update</label>
+  <select name="allusers">
+    {% for name in allusers %}
+      <option value="{{ name }}">{{ name }}</option>
+    {% endfor %} 
+  </select>
+  <h5>Enter the updated user details</h5>
+  <div>
+      <input type="text" name="Username" placeholder="Username">
+  </div>
+  <div>
+      <input type="text" name="Password" placeholder="Password">
+  </div>
+  <div>
+      <button >Update</button>
+  </div>
+</form>
+
+<a href="/user"><button> Go back </button></a>

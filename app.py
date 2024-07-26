@@ -58,9 +58,15 @@ if __name__ == '__main__':
 def home():
     return render_template('home.html')
 
-@app.route("/user")
+@app.route('/user')
+def user():
+    return render_template('user.html')
+
+#CRUD FOR USERS
+#CREATE
+@app.route("/createuser")
 def userinfo(feedback_message=None, feedback_type=False):
-    return render_template("user.html",
+    return render_template("createuser.html",
             feedback_message=feedback_message, 
             feedback_type=feedback_type)
 
@@ -80,6 +86,93 @@ def usercreate():
         db.session.rollback()
         return userinfo(feedback_message='Database error: {}'.format(err), feedback_type=False)
     
-    return userinfo(feedback_message='Successfully added chef {}'.format(Username),
+    return userinfo(feedback_message='Successfully added user {}'.format(Username),
                        feedback_type=True)
 
+#READ
+@app.route("/readuser")
+def readuser():
+    query = select(User)
+    result = db.session.execute(query)
+
+    userList = []
+    for user in result.scalars():
+        userList.append((user.Username))
+    
+    return render_template("readuser.html", userlist=userList)
+
+#UPDATE
+def getusers():
+    query = select(User)
+    result = db.session.execute(query)
+
+    userList = []
+    for user in result.scalars():
+        userList.append((user.Username, user.Password))
+    return userList
+
+@app.route("/updateuser")
+def updateuser(feedback_message=None, feedback_type=False):
+    userslist = [name for name, _, in getusers()]
+    return render_template("updateuser.html", 
+                           allusers=userslist, 
+                           feedback_message=feedback_message, 
+                           feedback_type=feedback_type)
+
+@app.route("/userupdate", methods=['POST'])
+def userupdate():
+    userForm = request.form.get('allusers')
+    username = request.form["Username"]
+    password = request.form["Password"]
+
+    try:
+        obj = db.session.query(User).filter(
+            User.Username==userForm).first()
+        
+        if obj == None:
+            msg = 'User {} not found.'.format(userForm)
+            return updateuser(feedback_message=msg, feedback_type=False)
+
+        if username != '':
+            obj.Username = username
+        if password != '':
+            obj.Password = password 
+        
+        db.session.commit()
+    except Exception as err:
+        db.session.rollback()
+        return updateuser(feedback_message=err, feedback_type=False)
+
+    return updateuser(feedback_message='Successfully updated user {}'.format(userForm),
+                       feedback_type=True)
+
+#DELETE
+
+@app.route("/deleteuser")
+def deleteuser(feedback_message=None, feedback_type=False):
+    userslist = [name for name, _, in getusers()]
+    return render_template("deleteuser.html", 
+                           allusers=userslist, 
+                           feedback_message=feedback_message, 
+                           feedback_type=feedback_type)
+
+@app.route("/userdelete", methods=['POST'])
+def userdelete():
+    userForm = request.form.get('allusers')
+
+    try:
+        obj = db.session.query(User).filter(
+            User.Username==userForm).first()
+        
+        if obj == None:
+            msg = 'User {} not found.'.format(userForm)
+            return deleteuser(feedback_message=msg, feedback_type=False)
+        
+        db.session.delete(obj)
+        db.session.commit()
+    except Exception as err:
+        db.session.rollback()
+        return deleteuser(feedback_message=err, feedback_type=False)
+
+    return deleteuser(feedback_message='Successfully deleted user {}'.format(userForm),
+                       feedback_type=True)
