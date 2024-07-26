@@ -215,7 +215,6 @@ def foodcreate():
     
     return foodinfo(feedback_message='Successfully added food {}'.format(Name),
                        feedback_type=True)
-
 #DELETE
 @app.route("/fooddelete", methods=['POST'])
 def fooddelete():
@@ -237,3 +236,15 @@ def fooddelete():
 
     return foodinfo(feedback_message='Successfully deleted food {}'.format(foodForm),
                        feedback_type=True)
+
+#READ
+@app.route("/foodlist")
+def readfood():
+    query = select(Food)
+    result = db.session.execute(query)
+
+    foodList = []
+    for food in result.scalars():
+        foodList.append((food.Name, food.Calories))
+    
+    return render_template("foodlist.html", foodList=foodList)

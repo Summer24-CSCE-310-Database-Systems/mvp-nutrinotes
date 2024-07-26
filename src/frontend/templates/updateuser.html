@@ -1,10 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Update User{% endblock %}
+
+{% block content %}
 <h2>Update Chef</h2>
 
 {% if feedback_message != None %}
     {% if feedback_type %}
         <span style="color:green">{{feedback_message}}</span>
     {% else %}
-    <span style="color:red">{{feedback_message}}</span>
+        <span style="color:red">{{feedback_message}}</span>
     {% endif %}
 {% endif %}
 
@@ -23,8 +28,9 @@
       <input type="text" name="Password" placeholder="Password">
   </div>
   <div>
-      <button >Update</button>
+      <button>Update</button>
   </div>
 </form>
 
-<a href="/user"><button> Go back </button></a>
+<a href="/user"><button>Go back</button></a>
+{% endblock %}

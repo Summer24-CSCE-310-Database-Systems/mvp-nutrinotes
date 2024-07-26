@@ -1,17 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}User CRUD Control{% endblock %}
+
+{% block content %}
 <h2>User CRUD Control</h2>
 
 <h3>Create</h3>
-<a href="/createuser"><button> Create a new user </button></a>
+<a href="/createuser"><button>Create a new user</button></a>
 
 <br/>
 <h3>Read</h3>
-<a href="/readuser"><button> Read User List </button></a>
+<a href="/readuser"><button>Read User List</button></a>
 
 <h3>Update</h3>
-<a href="/updateuser"><button> Update User Information </button></a>
+<a href="/updateuser"><button>Update User Information</button></a>
 
 <h3>Delete</h3>
-<a href="/deleteuser"><button> Delete User </button></a>
+<a href="/deleteuser"><button>Delete User</button></a>
 
 <br/>
-<a href="/"><button> Go back </button></a>
+<a href="/"><button>Go back</button></a>
+{% endblock %}

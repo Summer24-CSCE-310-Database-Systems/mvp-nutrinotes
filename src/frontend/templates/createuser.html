@@ -1,3 +1,8 @@
+{% extends "base.html" %}
+
+{% block title %}Create User{% endblock %}
+
+{% block content %}
 <h2>Create User</h2>
 
 {% if feedback_message != None %}
@@ -22,3 +27,4 @@
 </form>
 
 <a href="/user"><button> Go back </button></a>
+{% endblock %}
