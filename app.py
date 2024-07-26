@@ -54,6 +54,24 @@ class Goal(db.Model):
 if __name__ == '__main__':
     app.run()
 
+def getusers():
+    query = select(User)
+    result = db.session.execute(query)
+
+    userList = []
+    for user in result.scalars():
+        userList.append((user.Username, user.Password))
+    return userList
+
+def getfoods():
+    query = select(Food)
+    result = db.session.execute(query)
+
+    foodList = []
+    for food in result.scalars():
+        foodList.append((food.Name, food.Calories))
+    return foodList
+
 @app.route('/')
 def home():
     return render_template('home.html')
@@ -102,15 +120,6 @@ def readuser():
     return render_template("readuser.html", userlist=userList)
 
 #UPDATE
-def getusers():
-    query = select(User)
-    result = db.session.execute(query)
-
-    userList = []
-    for user in result.scalars():
-        userList.append((user.Username, user.Password))
-    return userList
-
 @app.route("/updateuser")
 def updateuser(feedback_message=None, feedback_type=False):
     userslist = [name for name, _, in getusers()]
@@ -182,7 +191,9 @@ def userdelete():
 #CREATE
 @app.route("/food")
 def foodinfo(feedback_message=None, feedback_type=False):
+    foodList = [name for name, _, in getfoods()]
     return render_template("food.html",
+            allFoods=foodList,
             feedback_message=feedback_message, 
             feedback_type=feedback_type)
 
@@ -203,4 +214,26 @@ def foodcreate():
         return foodinfo(feedback_message='Database error: {}'.format(err), feedback_type=False)
     
     return foodinfo(feedback_message='Successfully added food {}'.format(Name),
+                       feedback_type=True)
+
+#DELETE
+@app.route("/fooddelete", methods=['POST'])
+def fooddelete():
+    foodForm = request.form.get('allFoods')
+
+    try:
+        obj = db.session.query(Food).filter(
+            Food.Name==foodForm).first()
+        
+        if obj == None:
+            msg = 'Food {} not found.'.format(foodForm)
+            return foodinfo(feedback_message=msg, feedback_type=False)
+        
+        db.session.delete(obj)
+        db.session.commit()
+    except Exception as err:
+        db.session.rollback()
+        return foodinfo(feedback_message=err, feedback_type=False)
+
+    return foodinfo(feedback_message='Successfully deleted food {}'.format(foodForm),
                        feedback_type=True)
