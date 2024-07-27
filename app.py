@@ -372,23 +372,6 @@ def getCatelogs():
         catList.append((catelog.Catelog_ID, catelog.User_ID))
     return catList
 
-# Crud for Catelog
-# Create
-@app.route("/catelog")
-def cateloginfo(feedback_message=None, feedback_type=False):
-
-    # getCatelogs()
-
-    return render_template("catelog.html",
-            feedback_message=feedback_message, 
-            feedback_type=feedback_type)
-
-@app.route("/catelogcreate", methods=['POST'])
-def catelogcreate():
-    Name = request.form["Name"]
-    
-    return cateloginfo(feedback_message='Need Catelog_ID and User_ID code finished first {}'.format(Name),
-
 #UPDATE
 @app.route("/updatefood")
 def updatefood(feedback_message=None, feedback_type=False):
@@ -424,3 +407,23 @@ def foodupdate():
 
     return updatefood(feedback_message='Successfully updated food {}'.format(foodForm),
                        feedback_type=True)
+
+# Crud for Catelog
+# Create
+@app.route("/catelog")
+def cateloginfo(feedback_message=None, feedback_type=False):
+
+    # getCatelogs()
+
+    return render_template("catelog.html",
+            feedback_message=feedback_message, 
+            feedback_type=feedback_type)
+
+@app.route("/catelogcreate", methods=['POST'])
+def catelogcreate():
+    Name = request.form["Name"]
+    
+    return cateloginfo(feedback_message='Need Catelog_ID and User_ID code finished first {}'.format(Name),
+                       feedback_type=True)
+
+
