@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Update Foods{% endblock %}
+
+{% block content %}
+<h2>Update Foods</h2>
+
+{% if feedback_message != None %}
+    {% if feedback_type %}
+        <span style="color:green">{{feedback_message}}</span>
+    {% else %}
+        <span style="color:red">{{feedback_message}}</span>
+    {% endif %}
+{% endif %}
+
+<form action="{{ url_for('foodupdate')}}" method="post">
+  <label for="allfoods">Select a user to update</label>
+  <select name="allfoods">
+    {% for name in allfoods %}
+      <option value="{{ name }}">{{ name }}</option>
+    {% endfor %} 
+  </select>
+  <h5>Enter the updated user details</h5>
+  <div>
+      <input type="text" name="Name" placeholder="Name">
+  </div>
+  <div>
+      <input type="text" name="Calories" placeholder="Calories">
+  </div>
+  <div>
+      <button>Update</button>
+  </div>
+</form>
+
+<a href="/food"><button>Go back</button></a>
+{% endblock %}

@@ -360,3 +360,39 @@ def readfood():
         foodList.append((food.Name, food.Calories))
     
     return render_template("foodlist.html", foodList=foodList)
+
+#UPDATE
+@app.route("/updatefood")
+def updatefood(feedback_message=None, feedback_type=False):
+    foodslist = [name for name, _, in getfoods()]
+    return render_template("updatefood.html", 
+                           allfoods=foodslist, 
+                           feedback_message=feedback_message, 
+                           feedback_type=feedback_type)
+
+@app.route("/foodupdate", methods=['POST'])
+def foodupdate():
+    foodForm = request.form.get('allfoods')
+    name = request.form["Name"]
+    calories = request.form["Calories"]
+
+    try:
+        obj = db.session.query(Food).filter(
+            Food.Name==foodForm).first()
+        
+        if obj == None:
+            msg = 'Food {} not found.'.format(foodForm)
+            return updatefood(feedback_message=msg, feedback_type=False)
+
+        if name != '':
+            obj.Name = name
+        if calories != '':
+            obj.Calories = calories 
+        
+        db.session.commit()
+    except Exception as err:
+        db.session.rollback()
+        return updatefood(feedback_message=err, feedback_type=False)
+
+    return updatefood(feedback_message='Successfully updated food {}'.format(foodForm),
+                       feedback_type=True)
