@@ -31,13 +31,15 @@
 </head>
 <body>
     <div style="padding:20px">
-        <h1>Welcome to Nutrinotes!</h1>
+        <h1>Welcome to Nutrinotes, {{current_user.Username}}!</h1>
     </div>
     <div class="navbar">
         <a href="/">Home</a>
         <a href="/food">Add Foods!</a>
         <a href="/foodlist">Food List!</a>
         <a href="/user">User Information for admins</a>
+        <form action="{{url_for('logout_action')}}" method="post">
+            <button type = "submit">Logout</button>
     </div>
 </body>
 </html>
