@@ -126,7 +126,40 @@ def logout_action():
 #             return redirect(url_for('home'))
         
 #     return render_template('signup.html')
+@app.route('/SignUp')
+def SignUp():
+    return render_template('SignUp.html')
 
+@app.route("/SignUpNewUser")
+def SignUpInfo(feedback_message=None, feedback_type=False):
+    return render_template("SignUp.html",
+            feedback_message=feedback_message, 
+            feedback_type=feedback_type)
+
+@app.route('/SignUpAction', methods = ['POST'])
+def SignUpAction():
+    username = request.form["Username"]
+    password = request.form["Password"]
+
+    try:
+        entry = User(Username=username, Password=password)
+        db.session.add(entry)
+        db.session.commit()
+        user = User.query.filter_by(Username=username).first()
+        login_user(user)
+        flash('Successfully added user {}'.format(username), 'success')
+        return redirect(url_for('home'))  # Redirect to the form page after successful sign-up
+    except exc.IntegrityError as err:
+        db.session.rollback()
+        #flash('A username named {} already exists. Create a username with a different name.'.format(username), 'error')
+        return SignUpInfo(feedback_message='A username named {} already exists. Create a username with a different name.'.format(username), feedback_type=False)
+        #return redirect(url_for('SignUp'))  # Redirect to the form page with error message
+    except Exception as err:
+        db.session.rollback()
+        #flash('Database error: {}'.format(err), 'error')
+        return SignUpInfo(feedback_message='Database error: {}'.format(err), feedback_type=False)
+        #return redirect(url_for('SignUp'))
+    
 #AUTHENTICATION VIA LOGIN FLASK #############################################
 
 
