@@ -361,6 +361,34 @@ def readfood():
     
     return render_template("foodlist.html", foodList=foodList)
 
+# Catelog
+
+def getCatelogs():
+    query = select(Catalog)
+    result = db.session.execute(query)
+
+    catList = []
+    for catelog in result.scalars():
+        catList.append((catelog.Catelog_ID, catelog.User_ID))
+    return catList
+
+# Crud for Catelog
+# Create
+@app.route("/catelog")
+def cateloginfo(feedback_message=None, feedback_type=False):
+
+    # getCatelogs()
+
+    return render_template("catelog.html",
+            feedback_message=feedback_message, 
+            feedback_type=feedback_type)
+
+@app.route("/catelogcreate", methods=['POST'])
+def catelogcreate():
+    Name = request.form["Name"]
+    
+    return cateloginfo(feedback_message='Need Catelog_ID and User_ID code finished first {}'.format(Name),
+
 #UPDATE
 @app.route("/updatefood")
 def updatefood(feedback_message=None, feedback_type=False):

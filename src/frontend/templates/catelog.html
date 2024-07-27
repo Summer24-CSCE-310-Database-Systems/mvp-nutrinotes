@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Your food Catelog{% endblock %}
+
+{% block content %}
+<h2>Your Catelog</h2> 
+
+<table>
+    <tr>
+        <th>Catelog_ID</th>
+        <th>User_ID</th>
+    </tr>
+</table>
+
+<h2>Add a food to your Catelog</h2>
+
+{% if feedback_message != None %}
+    {% if feedback_type %}
+        <span style="color:green">{{feedback_message}}</span>
+    {% else %}
+    <span style="color:red">{{feedback_message}}</span>
+    {% endif %}
+{% endif %}
+
+<form action="{{ url_for('catelogcreate')}}" method="post">
+    <h5>Enter the food</h5>
+    <div>
+        <input type="text" name="Name" placeholder="Name">
+    </div>
+    <div>
+        <button >Create</button>
+    </div>
+</form>
+
+<a href="/"><button>Go back</button></a>
+{% endblock %}
+
