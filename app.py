@@ -1,8 +1,10 @@
 from multiprocessing import synchronize
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select
 from sqlalchemy import exc
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user #FOR LOGIN
+from flask_login import UserMixin
 import psycopg2
 
 app = Flask(__name__, template_folder='src/frontend/templates')
@@ -10,16 +12,28 @@ app = Flask(__name__, template_folder='src/frontend/templates')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost/nutrinotes'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 db = SQLAlchemy(app)
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'Users'
     User_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Username = db.Column(db.String(255), unique=True, nullable=False)
     Password = db.Column(db.String(255), nullable=False)
     catalogs = db.relationship('Catalog', back_populates='user')
     goals = db.relationship('Goal', back_populates='user')
+
+    #return ID for login
+    def get_id(self):
+        return str(self.User_ID)
+
+#Defines user id as attribute tracked
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 class Food(db.Model):
     __tablename__ = 'Food'
@@ -54,6 +68,112 @@ class Goal(db.Model):
 if __name__ == '__main__':
     app.run()
 
+#AUTHENTICATION VIA LOGIN FLASK #############################################
+
+#IMPORTANT! Current_User is set as global by flask login and can thus be used in any html!!!!
+
+@app.route('/')
+def start():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    else:
+        return redirect(url_for('login_action'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login_action():
+
+    #If user is logged in redirect to home
+    #if current_user.is_authenticated:
+        #return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(Username=username).first()
+        #If the user exists and the password for that user matches
+        if user and user.Password == password:
+            #User has been authenticated and is logged in
+            login_user(user)
+            #redirect to home
+            return redirect(url_for('home'))
+        else:
+            #failed login
+            flash('Invalid Login')
+    return render_template('login.html')
+
+@app.route('/logout', methods=['POST'])
+def logout_action():
+    logout_user()
+    return redirect(url_for('login_action'))
+
+#####################################################
+
+# @app.route('/SignUp', methods=['GET', 'POST'])
+# def SignUp():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         user = User.query.filter_by(Username=username).first()
+#         #If the user exists and the password for that user matches
+#         if user:
+#             flash('Invalid Username!')
+#             #User has been authenticated and is logged in
+#             return render_template('signup.html')
+#         elif password != "" and user != "":
+#             #User successfully signed up
+#             login_user(user)
+#             #redirect to home
+#             return redirect(url_for('home'))
+        
+#     return render_template('signup.html')
+@app.route('/SignUp')
+def SignUp():
+    return render_template('SignUp.html')
+
+@app.route("/SignUpNewUser")
+def SignUpInfo(feedback_message=None, feedback_type=False):
+    return render_template("SignUp.html",
+            feedback_message=feedback_message, 
+            feedback_type=feedback_type)
+
+@app.route('/SignUpAction', methods = ['POST'])
+def SignUpAction():
+    username = request.form["Username"]
+    password = request.form["Password"]
+
+    try:
+        entry = User(Username=username, Password=password)
+        db.session.add(entry)
+        db.session.commit()
+        user = User.query.filter_by(Username=username).first()
+        login_user(user)
+        flash('Successfully added user {}'.format(username), 'success')
+        return redirect(url_for('home'))  # Redirect to the form page after successful sign-up
+    except exc.IntegrityError as err:
+        db.session.rollback()
+        #flash('A username named {} already exists. Create a username with a different name.'.format(username), 'error')
+        return SignUpInfo(feedback_message='A username named {} already exists. Create a username with a different name.'.format(username), feedback_type=False)
+        #return redirect(url_for('SignUp'))  # Redirect to the form page with error message
+    except Exception as err:
+        db.session.rollback()
+        #flash('Database error: {}'.format(err), 'error')
+        return SignUpInfo(feedback_message='Database error: {}'.format(err), feedback_type=False)
+        #return redirect(url_for('SignUp'))
+    
+#AUTHENTICATION VIA LOGIN FLASK #############################################
+
+
+
+
+@app.route('/home')
+def home():
+    return render_template('home.html')
+
+@app.route('/user')
+def user():
+    return render_template('user.html')
+
+
 def getusers():
     query = select(User)
     result = db.session.execute(query)
@@ -71,14 +191,6 @@ def getfoods():
     for food in result.scalars():
         foodList.append((food.Name, food.Calories))
     return foodList
-
-@app.route('/')
-def home():
-    return render_template('home.html')
-
-@app.route('/user')
-def user():
-    return render_template('user.html')
 
 #CRUD FOR USERS
 #CREATE
