@@ -1,4 +1,4 @@
-name: nutrinotes2
+name: nutrinotes
 channels:
   - defaults
 dependencies:
