@@ -46,13 +46,14 @@ class Catalog(db.Model):
     __tablename__ = 'Catalog'
     Catalog_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     User_ID = db.Column(db.Integer, db.ForeignKey('Users.User_ID'), nullable=False)
+    Name = db.Column(db.String(255), nullable=False)
     user = db.relationship('User', back_populates='catalogs')
     servings = db.relationship('Serving', back_populates='catalog')
 
 class Serving(db.Model):
     __tablename__ = 'Serving'
-    Catalog_ID = db.Column(db.Integer, db.ForeignKey('Catalog.Catalog_ID'), primary_key=True, nullable=False)
-    Food_ID = db.Column(db.Integer, db.ForeignKey('Food.Food_ID'), primary_key=True, nullable=False)
+    Catalog_ID = db.Column(db.Integer, db.ForeignKey('Catalog.Catalog_ID', ondelete = 'CASCADE'), primary_key=True, nullable=False)
+    Food_ID = db.Column(db.Integer, db.ForeignKey('Food.Food_ID', ondelete = 'CASCADE'), primary_key=True, nullable=False)
     Name = db.Column(db.String(255))
     catalog = db.relationship('Catalog', back_populates='servings')
     food = db.relationship('Food', back_populates='servings')
@@ -410,20 +411,67 @@ def foodupdate():
 
 # Crud for Catelog
 # Create
-@app.route("/catelog")
-def cateloginfo(feedback_message=None, feedback_type=False):
+@app.route("/catalog_home")
+def cataloginfo(feedback_message=None, feedback_type=False):
 
-    # getCatelogs()
-
-    return render_template("catelog.html",
+    return render_template("catalog_home.html",
             feedback_message=feedback_message, 
             feedback_type=feedback_type)
 
-@app.route("/catelogcreate", methods=['POST'])
-def catelogcreate():
-    Name = request.form["Name"]
+
+# @app.route("/catalogcreate", methods=['POST'])
+# def catalogcreate():
+#     Name = request.form["Name"]
+#     try:
+#         entry
+#     ex
+#     return cataloginfo(feedback_message='Need Catelog_ID and User_ID code finished first {}'.format(Name),
+#                        feedback_type=True)
+
+#CREATE CATALOG
+@app.route("/createcatalog")
+def createcataloginfo(feedback_message=None, feedback_type=False):
+    return render_template("createcatalog.html",
+            feedback_message=feedback_message, 
+            feedback_type=feedback_type)
+
+@app.route("/catalogcreate", methods=['POST'])
+def catalogcreate():
+    name = request.form["Name"]
+    #Username = request.form["Username"]
+    #Password = request.form["Password"]
+
+    try:
+        entry = Catalog(Name=name, User_ID = current_user.User_ID)
+        db.session.add(entry)
+        db.session.commit()
+    except exc.IntegrityError as err:
+        db.session.rollback()
+        return createcataloginfo(feedback_message='A catalog named {} already exists. Create a catalaog with a different name.'.format(name), feedback_type=False)
+    except Exception as err:
+        db.session.rollback()
+        return createcataloginfo(feedback_message='Database error: {}'.format(err), feedback_type=False)
     
-    return cateloginfo(feedback_message='Need Catelog_ID and User_ID code finished first {}'.format(Name),
+    return createcataloginfo(feedback_message='Successfully added catalog {}'.format(name),
                        feedback_type=True)
 
+
+#VIEW CATALOG
+
+
+#DELETE CATALOG
+
+
+#UPDATE CATALOG
+
+def getcatalogs():
+    user_id = current_user.User_ID
+    query = select(Catalog.Name).where(Catalog.User_ID == user_id)
+    result = db.session.execute(query)
+
+    cataloglist = []
+
+    cataloglist = [row[0] for row in result.fetchall()]
+
+    return cataloglist
 
