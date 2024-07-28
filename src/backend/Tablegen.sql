@@ -37,3 +37,12 @@ CREATE TABLE Goals (
     Date_of_Goal DATE NOT NULL,
     FOREIGN KEY (User_ID) REFERENCES Users(User_ID)
 );
+
+-- Friends Table
+CREATE TABLE Friends (
+    Friends_ID SERIAL PRIMARY KEY,
+    User_ID INT NOT NULL,
+    Name VARCHAR(255),
+    Date_of_Friendship DATE NOT NULL,
+    FOREIGN KEY (User_ID) REFERENCES Users(User_ID)
+);

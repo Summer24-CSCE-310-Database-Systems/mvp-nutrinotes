@@ -3,9 +3,11 @@ from flask import Flask, render_template, request, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select
 from sqlalchemy import exc
+from sqlalchemy.sql import func
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user #FOR LOGIN
 from flask_login import UserMixin
 import psycopg2
+from datetime import datetime
 
 app = Flask(__name__, template_folder='src/frontend/templates')
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://<user>:<password>@localhost/<appname>'
@@ -25,6 +27,7 @@ class User(db.Model, UserMixin):
     Password = db.Column(db.String(255), nullable=False)
     catalogs = db.relationship('Catalog', back_populates='user')
     goals = db.relationship('Goal', back_populates='user')
+    friends = db.relationship('Friend', back_populates='user')
 
     #return ID for login
     def get_id(self):
@@ -64,6 +67,14 @@ class Goal(db.Model):
     Weight = db.Column(db.Float, nullable=False)
     Date_of_Goal = db.Column(db.Date, nullable=False)
     user = db.relationship('User', back_populates='goals')
+
+class Friend(db.Model):
+    __tablename__ = 'Friends'
+    Friend_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    User_ID = db.Column(db.Integer, db.ForeignKey('Users.User_ID'), nullable=False)
+    Name = db.Column(db.String(255))
+    Date_of_Friendship = db.Column(db.Date, nullable=False)
+    user = db.relationship('User', back_populates='friends')
 
 if __name__ == '__main__':
     app.run()
@@ -191,6 +202,15 @@ def getfoods():
     for food in result.scalars():
         foodList.append((food.Name, food.Calories))
     return foodList
+
+def getFriends():
+    query = select(Friend)
+    result = db.session.execute(query)
+
+    fList = []
+    for f in result.scalars():
+        fList.append((f.Name, f.Date_of_Friendship))
+    return fList
 
 #CRUD FOR USERS
 #CREATE
@@ -427,3 +447,135 @@ def catelogcreate():
                        feedback_type=True)
 
 
+# Friend
+# Create
+@app.route("/friends")
+def friendsinfo(feedback_message=None, feedback_type=False):
+
+    friendsList = readfriends()
+
+    return render_template("friends.html", friendsList=friendsList, 
+            feedback_message=feedback_message, 
+            feedback_type=feedback_type)
+
+@app.route("/friendscreate", methods=['POST'])
+def friendscreate():
+    Name = request.form["Name"]
+    # Calories = request.form["Calories"]
+
+    try:
+        entry = Friend(User_ID=current_user.User_ID, Name=Name, Date_of_Friendship=func.now())
+        db.session.add(entry)
+        db.session.commit()
+    except exc.IntegrityError as err:
+        db.session.rollback()
+        return friendsinfo(feedback_message='Friend id already exists?', feedback_type=False)
+    except Exception as err:
+        db.session.rollback()
+        return friendsinfo(feedback_message='Database error: {}'.format(err), feedback_type=False)
+    
+    return friendsinfo(feedback_message='Successfully added friend {}'.format(Name),
+                       feedback_type=True)
+
+#READ
+def readfriends():
+    query = select(Friend).where(Friend.User_ID == current_user.User_ID)
+    result = db.session.execute(query)
+
+    friendslist = []
+    for friend in result.scalars():
+        friendslist.append((friend.Name, friend.Date_of_Friendship))
+    
+    return friendslist
+
+
+
+@app.route('/friends_action', methods=['POST'])
+def friends_action():
+
+    # selected_friend = request.form['friend']
+    action = request.form['f_action']
+
+    friendsForm = request.form.get('friendsList')
+
+    if action == 'delete':
+        # Logic to delete the friend
+        # For example, remove the friend from the list or database
+        return friendsdelete()
+    
+    elif action == 'update':
+        # Logic to update the friend
+        # For example, redirect to an update page with the friend's details
+        return redirect(url_for('updatefriend', friendName=friendsForm))
+    
+    return "Unknown action", 400
+
+
+
+
+# Update
+@app.route("/friendupdate", methods=['POST', 'Get'])
+def friendupdate():
+    oldfriendsName = request.form.get('friendName')
+    friendsName = request.form.get('Name')
+    friendsDate = request.form.get('Date_of_Friendship')
+
+    final_name = oldfriendsName
+
+    try:
+        obj = db.session.query(Friend).filter(Friend.Name==oldfriendsName).first()
+
+        if obj == None:
+            msg = 'Friend {} not found.'.format(oldfriendsName)
+            return friendsinfo(feedback_message=msg, feedback_type=False)
+
+        if friendsName != '':
+            obj.Name = friendsName
+            final_name = friendsName
+        if friendsDate != '':
+            if is_valid_date(friendsDate):
+                obj.Date_of_Friendship = friendsDate 
+        
+        db.session.commit()
+    except Exception as err:
+        db.session.rollback()
+        return friendsinfo(feedback_message=err, feedback_type=False)
+
+    return friendsinfo(feedback_message=f'Successfully updated friend!\n{oldfriendsName} ----> {final_name}    {friendsDate}',
+                       feedback_type=True)
+
+@app.route("/updatefriend")
+def updatefriend(feedback_message=None, feedback_type=False):
+    friendName = request.args.get('friendName')
+    return render_template("updatefriend.html", 
+                           friendName=friendName, 
+                           feedback_message=feedback_message, 
+                           feedback_type=feedback_type)
+
+#DELETE
+@app.route("/friendsdelete", methods=['POST'])
+def friendsdelete():
+    friendsForm = request.form.get('friendsList')
+
+    try:
+        obj = db.session.query(Friend).filter(Friend.Name == friendsForm).first()
+        
+        if obj == None:
+            msg = 'Friend {} not found.'.format(friendsForm)
+            return friendsinfo(feedback_message=msg, feedback_type=False)
+        
+        db.session.delete(obj)
+        db.session.commit()
+    except Exception as err:
+        db.session.rollback()
+        return friendsinfo(feedback_message=err, feedback_type=False)
+
+    return friendsinfo(feedback_message='Successfully deleted friend: {}'.format(friendsForm),
+                       feedback_type=True)
+
+def is_valid_date(date_str, date_format='%Y-%m-%d'):
+    try:
+        datetime.strptime(date_str, date_format)
+        return True
+    except ValueError:
+        return False
