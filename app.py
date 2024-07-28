@@ -409,7 +409,7 @@ def foodupdate():
     return updatefood(feedback_message='Successfully updated food {}'.format(foodForm),
                        feedback_type=True)
 
-# Crud for Catelog
+# Crud for Catalog##################################################################
 # Create
 @app.route("/catalog_home")
 def cataloginfo(feedback_message=None, feedback_type=False):
@@ -417,16 +417,6 @@ def cataloginfo(feedback_message=None, feedback_type=False):
     return render_template("catalog_home.html",
             feedback_message=feedback_message, 
             feedback_type=feedback_type)
-
-
-# @app.route("/catalogcreate", methods=['POST'])
-# def catalogcreate():
-#     Name = request.form["Name"]
-#     try:
-#         entry
-#     ex
-#     return cataloginfo(feedback_message='Need Catelog_ID and User_ID code finished first {}'.format(Name),
-#                        feedback_type=True)
 
 #CREATE CATALOG
 @app.route("/createcatalog")
@@ -438,8 +428,6 @@ def createcataloginfo(feedback_message=None, feedback_type=False):
 @app.route("/catalogcreate", methods=['POST'])
 def catalogcreate():
     name = request.form["Name"]
-    #Username = request.form["Username"]
-    #Password = request.form["Password"]
 
     try:
         entry = Catalog(Name=name, User_ID = current_user.User_ID)
@@ -503,15 +491,9 @@ def catalogdeleteinit():
 #selecting a catalog to update 
 @app.route('/catalogselect')
 def catalogselect():
-    #catalog_ID = session.get('current_catalog_ID')
-    #if not catalog_ID:
     session.pop('current_catalog_ID', None)
     catalogs = Catalog.query.filter_by(User_ID = current_user.User_ID).all()
-    for catalog in catalogs:
-        print(f"Catalog ID: {catalog.Catalog_ID}, Name: {catalog.Name}")
     return render_template('updatecatalogselect.html', catalogs=catalogs)
-    #this needs to direct to add/remove page TODO
-    #return render_template('updatecatalogfin.html')
 
 
 @app.route('/storecatalog', methods = ['POST'])
@@ -560,14 +542,5 @@ def removefoodcatalog():
         return redirect(url_for('selectcatalog'))
     else:
         return "No record of this food in DB"
-# def getcatalogs():
-#     user_id = current_user.User_ID
-#     query = select(Catalog.Name).where(Catalog.User_ID == user_id)
-#     result = db.session.execute(query)
 
-#     cataloglist = []
-
-#     cataloglist = [row[0] for row in result.fetchall()]
-
-#     return cataloglist
 
