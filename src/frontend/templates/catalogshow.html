@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}List of Foods{% endblock %}
+
+{% block content %}
+<h2>List of Foods</h2> 
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Calories</th>
+    </tr>
+    {% for food in foods%}
+    <tr>
+        <td>{{ food.Name }}</td>
+        <td>{{ food.Calories }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<a href="/selectcatalogview"><button>Go back</button></a>
+{% endblock %}

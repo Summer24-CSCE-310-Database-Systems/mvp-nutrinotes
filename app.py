@@ -457,6 +457,27 @@ def catalogcreate():
 
 
 #VIEW CATALOG
+@app.route('/selectcatalogview')
+def selectcatalogview():
+    session.pop('current_catalog_ID', None)
+    catalogs = Catalog.query.filter_by(User_ID = current_user.User_ID).all()
+    for catalog in catalogs:
+        print(f"Catalog ID: {catalog.Catalog_ID}, Name: {catalog.Name}")
+    return render_template('catalogviewselect.html', catalogs=catalogs)
+
+@app.route('/storeviewcatalog', methods = ['POST'])
+def storeviewcatalog():
+    catalog_ID = request.form['catalog_id']
+    session['current_catalog_ID'] = catalog_ID
+    return redirect(url_for('viewcatalogselect'))
+
+@app.route('/viewcatalogselect', methods = ['GET','POST'])
+def viewcatalogselect():
+    catalog_ID = session.get('current_catalog_ID')
+    foodlist = db.session.query(Food).join(Serving).filter(Serving.Catalog_ID == catalog_ID).all()
+    return render_template('catalogshow.html', foods=foodlist)
+
+
 
 
 #DELETE CATALOG
