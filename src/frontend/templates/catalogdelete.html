@@ -24,7 +24,25 @@
         </select>
         <input id = "button" type="submit" value="Remove Catalog">
     </form>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            var cat = document.getElementById('catalog');
+            var button = document.getElementById('button');
+    
+            function checkCatalog(){
+                var val = cat.value;
+                if(val === ""){
+                    button.disabled = true;
+                }
+                else{
+                    button.disabled = false;
+                }
+            }
+            checkCatalog();
+    
+            catalog.addEventListener('change', checkCatalog);
+        });
+    </script>
 
 <a href="/catalog_home"><button> Go back </button></a>
 {% endblock %}
