@@ -40,7 +40,7 @@ class Food(db.Model):
     Food_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Name = db.Column(db.String(255), unique=True, nullable=False)
     Calories = db.Column(db.Integer, nullable=False)
-    servings = db.relationship('Serving', back_populates='food')
+    servings = db.relationship('Serving', back_populates='food', cascade = 'all, delete-orphan')
 
 class Catalog(db.Model):
     __tablename__ = 'Catalog'
@@ -48,7 +48,7 @@ class Catalog(db.Model):
     User_ID = db.Column(db.Integer, db.ForeignKey('Users.User_ID'), nullable=False)
     Name = db.Column(db.String(255), nullable=False)
     user = db.relationship('User', back_populates='catalogs')
-    servings = db.relationship('Serving', back_populates='catalog')
+    servings = db.relationship('Serving', back_populates='catalog', cascade = 'all, delete-orphan')
 
 class Serving(db.Model):
     __tablename__ = 'Serving'
@@ -481,6 +481,21 @@ def viewcatalogselect():
 
 
 #DELETE CATALOG
+@app.route('/catalogdelete', methods = ['POST'])
+def catalogdelete():
+    catalog_ID = request.form.get('catalog_id')
+    catalog = db.session.query(Catalog).filter_by(Catalog_ID = catalog_ID).first()
+    if catalog:
+        db.session.delete(catalog)
+        db.session.commit()
+        return redirect(url_for('catalogdeleteinit'))
+    else:
+        return "No record of this food in DB"
+
+@app.route('/catalogdeleteinit', methods = ['GET', 'POST'])
+def catalogdeleteinit():
+    catalogs = Catalog.query.filter_by(User_ID = current_user.User_ID).all()
+    return render_template('catalogdelete.html', catalogs=catalogs)
 
 
 #UPDATE CATALOG
