@@ -1,10 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}Nutrinotes{% endblock %}
+{% block title %}Your food Catalog{% endblock %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,21 +27,24 @@
         }
     </style>
 </head>
-<body>
-    <div style="padding:20px">
-        <h1>Welcome to Nutrinotes, {{current_user.Username}}!</h1>
-    </div>
-    <div class="navbar">
-        <a href="/">Home</a>
-        <a href="/food">Add Foods!</a>
-        <a href="/user">User Information for admins</a>
+<h2>Your Catalog</h2> 
 
-        <a href="/catalog_home">Catalogs</a>
+</div>
+<div class="navbar">
+    <a href="/">Home</a>
+    <a href="/createcatalog">Create a catalog</a>
+    <a href="/selectcatalogview">View a catalog</a>
+    <a href="/catalogdeleteinit">Remove a catalog</a>
+    <a href="/catalogselect">Update a catalog</a>
+</div>
 
-        <form action="{{url_for('logout_action')}}" method="post">
-            <button type = "submit">Logout</button>
-        </form>
-    </div>
-</body>
-</html>
+
+{% if feedback_message != None %}
+    {% if feedback_type %}
+        <span style="color:green">{{feedback_message}}</span>
+    {% else %}
+    <span style="color:red">{{feedback_message}}</span>
+    {% endif %}
+{% endif %}
 {% endblock %}
+

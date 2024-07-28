@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Catalog Update</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>select{width:300px}</style>
+</head>
+<body>
+    <h1>Add food to catalog</h1>
+    <form action="{{ url_for('addfoodcatalog')}}" method="post">
+        <label for="allFoods">Select a food</label>
+        <select name="addedfood" id = "allFoods">
+          {% for food in allFoods %}
+            <option value="{{ food.Food_ID }}">{{ food.Name }}</option>
+          {% endfor %} 
+        </select>
+        <div>
+          <button type="submit" name="delete_button" value="delete_button"> Add </button>
+        </div>
+    </form>
+
+
+    <h1>Remove food from catalog</h1>
+    <form action="{{ url_for('removefoodcatalog')}}" method="post">
+        <label for="currentFoods">Select a food</label>
+        <select name="removedfood" id = currentFoods>
+          {% for food in catalogFood %}
+            <option value="{{ food.Food_ID }}">{{ food.Name }}</option>
+          {% endfor %} 
+        </select>
+        <div>
+          <button type="submit" name="delete_button" value="delete_button"> Delete </button>
+        </div>
+    </form>
+    <a href="/catalogselect"><button> Go back </button></a>
+</body>
+</html>

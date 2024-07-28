@@ -1,5 +1,5 @@
 from multiprocessing import synchronize
-from flask import Flask, render_template, request, flash, redirect, url_for
+from flask import Flask, render_template, request, flash, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select
 from sqlalchemy import exc
@@ -40,19 +40,20 @@ class Food(db.Model):
     Food_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Name = db.Column(db.String(255), unique=True, nullable=False)
     Calories = db.Column(db.Integer, nullable=False)
-    servings = db.relationship('Serving', back_populates='food')
+    servings = db.relationship('Serving', back_populates='food', cascade = 'all, delete-orphan')
 
 class Catalog(db.Model):
     __tablename__ = 'Catalog'
     Catalog_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     User_ID = db.Column(db.Integer, db.ForeignKey('Users.User_ID'), nullable=False)
+    Name = db.Column(db.String(255), nullable=False)
     user = db.relationship('User', back_populates='catalogs')
-    servings = db.relationship('Serving', back_populates='catalog')
+    servings = db.relationship('Serving', back_populates='catalog', cascade = 'all, delete-orphan')
 
 class Serving(db.Model):
     __tablename__ = 'Serving'
-    Catalog_ID = db.Column(db.Integer, db.ForeignKey('Catalog.Catalog_ID'), primary_key=True, nullable=False)
-    Food_ID = db.Column(db.Integer, db.ForeignKey('Food.Food_ID'), primary_key=True, nullable=False)
+    Catalog_ID = db.Column(db.Integer, db.ForeignKey('Catalog.Catalog_ID', ondelete = 'CASCADE'), primary_key=True, nullable=False)
+    Food_ID = db.Column(db.Integer, db.ForeignKey('Food.Food_ID', ondelete = 'CASCADE'), primary_key=True, nullable=False)
     Name = db.Column(db.String(255))
     catalog = db.relationship('Catalog', back_populates='servings')
     food = db.relationship('Food', back_populates='servings')
@@ -408,22 +409,138 @@ def foodupdate():
     return updatefood(feedback_message='Successfully updated food {}'.format(foodForm),
                        feedback_type=True)
 
-# Crud for Catelog
+# Crud for Catalog##################################################################
 # Create
-@app.route("/catelog")
-def cateloginfo(feedback_message=None, feedback_type=False):
+@app.route("/catalog_home")
+def cataloginfo(feedback_message=None, feedback_type=False):
 
-    # getCatelogs()
-
-    return render_template("catelog.html",
+    return render_template("catalog_home.html",
             feedback_message=feedback_message, 
             feedback_type=feedback_type)
 
-@app.route("/catelogcreate", methods=['POST'])
-def catelogcreate():
-    Name = request.form["Name"]
+#CREATE CATALOG
+@app.route("/createcatalog")
+def createcataloginfo(feedback_message=None, feedback_type=False):
+    return render_template("createcatalog.html",
+            feedback_message=feedback_message, 
+            feedback_type=feedback_type)
+
+@app.route("/catalogcreate", methods=['POST'])
+def catalogcreate():
+    name = request.form["Name"]
+
+    try:
+        entry = Catalog(Name=name, User_ID = current_user.User_ID)
+        db.session.add(entry)
+        db.session.commit()
+    except exc.IntegrityError as err:
+        db.session.rollback()
+        return createcataloginfo(feedback_message='A catalog named {} already exists. Create a catalaog with a different name.'.format(name), feedback_type=False)
+    except Exception as err:
+        db.session.rollback()
+        return createcataloginfo(feedback_message='Database error: {}'.format(err), feedback_type=False)
     
-    return cateloginfo(feedback_message='Need Catelog_ID and User_ID code finished first {}'.format(Name),
+    return createcataloginfo(feedback_message='Successfully added catalog {}'.format(name),
                        feedback_type=True)
+
+
+#VIEW CATALOG
+@app.route('/selectcatalogview')
+def selectcatalogview():
+    session.pop('current_catalog_ID', None)
+    catalogs = Catalog.query.filter_by(User_ID = current_user.User_ID).all()
+    for catalog in catalogs:
+        print(f"Catalog ID: {catalog.Catalog_ID}, Name: {catalog.Name}")
+    return render_template('catalogviewselect.html', catalogs=catalogs)
+
+@app.route('/storeviewcatalog', methods = ['POST'])
+def storeviewcatalog():
+    catalog_ID = request.form['catalog_id']
+    session['current_catalog_ID'] = catalog_ID
+    return redirect(url_for('viewcatalogselect'))
+
+@app.route('/viewcatalogselect', methods = ['GET','POST'])
+def viewcatalogselect():
+    catalog_ID = session.get('current_catalog_ID')
+    foodlist = db.session.query(Food).join(Serving).filter(Serving.Catalog_ID == catalog_ID).all()
+    return render_template('catalogshow.html', foods=foodlist)
+
+
+
+
+#DELETE CATALOG
+@app.route('/catalogdelete', methods = ['POST'])
+def catalogdelete():
+    catalog_ID = request.form.get('catalog_id')
+    catalog = db.session.query(Catalog).filter_by(Catalog_ID = catalog_ID).first()
+    if catalog:
+        db.session.delete(catalog)
+        db.session.commit()
+        return redirect(url_for('catalogdeleteinit'))
+    else:
+        return "No record of this food in DB"
+
+@app.route('/catalogdeleteinit', methods = ['GET', 'POST'])
+def catalogdeleteinit():
+    catalogs = Catalog.query.filter_by(User_ID = current_user.User_ID).all()
+    return render_template('catalogdelete.html', catalogs=catalogs)
+
+
+#UPDATE CATALOG
+
+#selecting a catalog to update 
+@app.route('/catalogselect')
+def catalogselect():
+    session.pop('current_catalog_ID', None)
+    catalogs = Catalog.query.filter_by(User_ID = current_user.User_ID).all()
+    return render_template('updatecatalogselect.html', catalogs=catalogs)
+
+
+@app.route('/storecatalog', methods = ['POST'])
+def storecatalog():
+    catalog_ID = request.form['catalog_id']
+    session['current_catalog_ID'] = catalog_ID
+    return redirect(url_for('selectcatalog'))
+
+#used to FINALLY app/remove to selected catalog
+@app.route('/selectcatalog', methods = ['GET','POST'])
+def selectcatalog():
+    #for adding
+    catalog_ID = session.get('current_catalog_ID')
+    foodlist = Food.query.all()
+
+    #for removing
+    catalogfoodquery = db.session.query(Food).join(Serving).filter(Serving.Catalog_ID == catalog_ID)
+    catalogfood = catalogfoodquery
+
+    #removing those foods already in catalog from adding list
+    catalogfoodID = {food.Food_ID for food in catalogfood}
+    validfoods = [food for food in foodlist if food.Food_ID not in catalogfoodID]
+
+    print("All Foods:", [food.Name for food in foodlist]) 
+    return render_template('updatecatalogfin.html', allFoods = validfoods, catalogFood = catalogfood)
+
+#Adding food to a catalog
+@app.route('/addfoodcatalog', methods = ['POST'])
+def addfoodcatalog():
+    catalog_ID = session.get('current_catalog_ID')
+    food_ID = request.form.get('addedfood')
+    serving = Serving(Food_ID = food_ID, Catalog_ID = catalog_ID)
+    db.session.add(serving)
+    db.session.commit()
+    return redirect(url_for('selectcatalog'))
+
+#Removing food from a catalog
+@app.route('/removefoodcatalog', methods = ['POST'])
+def removefoodcatalog():
+    catalog_ID = session.get('current_catalog_ID')
+    food_ID = request.form.get('removedfood')
+    serving = db.session.query(Serving).filter_by(Food_ID=food_ID, Catalog_ID=catalog_ID).first()
+    if serving:
+        db.session.delete(serving)
+        db.session.commit()
+        return redirect(url_for('selectcatalog'))
+    else:
+        return "No record of this food in DB"
 
 

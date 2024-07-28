@@ -16,7 +16,8 @@ CREATE TABLE Food (
 CREATE TABLE Catalog (
     Catalog_ID SERIAL PRIMARY KEY,
     User_ID INT NOT NULL,
-    FOREIGN KEY (User_ID) REFERENCES Users(User_ID)
+    FOREIGN KEY (User_ID) REFERENCES Users(User_ID),
+    Name VARCHAR(255) NOT NULL
 );
 
 -- Serving table (Join Table)
@@ -25,8 +26,8 @@ CREATE TABLE Serving (
     Food_ID INT NOT NULL,
     Name VARCHAR(255),
     PRIMARY KEY (Catalog_ID, Food_ID),
-    FOREIGN KEY (Catalog_ID) REFERENCES Catalog(Catalog_ID),
-    FOREIGN KEY (Food_ID) REFERENCES Food(Food_ID)
+    FOREIGN KEY (Catalog_ID) REFERENCES Catalog(Catalog_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Food_ID) REFERENCES Food(Food_ID) ON DELETE CASCADE
 );
 
 -- Goals table

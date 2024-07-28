@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Select a Catalog{% endblock %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select a Catalog</title>
+    <style>select{width:300px}</style>
+    
+</head>
+<body>
+    <h1>Select a Catalog</h1>
+    <form action="{{ url_for('storecatalog') }}" method="post">
+        <label for="catalog">Choose a Catalog:</label>
+        <select name="catalog_id" id="catalog">
+            {% for catalog in catalogs %}
+                <option value="{{ catalog.Catalog_ID }}">{{ catalog.Name }}</option>
+            {% else %}
+                <option value="">No catalogs available</option>
+            {% endfor %}
+        </select>
+        <input id = "button" type="submit" value="Select Catalog">
+    </form>
+    <a href="/catalog_home"><button> Go back </button></a>
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        var cat = document.getElementById('catalog');
+        var button = document.getElementById('button');
+
+        function checkCatalog(){
+            var val = cat.value;
+            if(val === ""){
+                button.disabled = true;
+            }
+            else{
+                button.disabled = false;
+            }
+        }
+        checkCatalog();
+
+        catalog.addEventListener('change', checkCatalog);
+    });
+</script>
+</html>
+
+{% endblock %}
