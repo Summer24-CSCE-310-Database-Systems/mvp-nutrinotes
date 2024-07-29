@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Food Edit{% endblock %}
+
+{% block content %}
+
+{% if feedback_message != None %}
+    {% if feedback_type %}
+        <span style="color:green">{{feedback_message}}</span>
+    {% else %}
+    <span style="color:red">{{feedback_message}}</span>
+    {% endif %}
+{% endif %}
+
+<h1>Select a Catalog to delete!</h1>
+    <form action="{{ url_for('catalogdelete')}}" method="post">
+        <label for="catalog">Choose a Catalog:</label>
+        <select name="catalog_id" id="catalog">
+            {% for catalog in catalogs %}
+                <option value="{{ catalog.Catalog_ID }}">{{ catalog.Name }}</option>
+            {% else %}
+                <option value="">No catalogs available</option>
+            {% endfor %}
+        </select>
+        <input id = "button" type="submit" value="Remove Catalog">
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            var cat = document.getElementById('catalog');
+            var button = document.getElementById('button');
+    
+            function checkCatalog(){
+                var val = cat.value;
+                if(val === ""){
+                    button.disabled = true;
+                }
+                else{
+                    button.disabled = false;
+                }
+            }
+            checkCatalog();
+    
+            catalog.addEventListener('change', checkCatalog);
+        });
+    </script>
+
+<a href="/catalog_home"><button> Go back </button></a>
+{% endblock %}
