@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Update Friend{% endblock %}
+
+{% block content %}
+<h2>Update Friend</h2>
+
+{% if feedback_message != None %}
+    {% if feedback_type %}
+        <span style="color:green">{{feedback_message}}</span>
+    {% else %}
+        <span style="color:red">{{feedback_message}}</span>
+    {% endif %}
+{% endif %}
+
+<form action="{{ url_for('friendupdate')}}" method="post">
+  <label for="friendName">{{ friendName }}</label>
+  <h5>Enter the updated user details</h5>
+  <input type="hidden" name="friendName" value="{{ friendName }}">
+  <div>
+      <input type="text" name="Name" placeholder="Name">
+  </div>
+  <div>
+      <input type="text" name="Date_of_Friendship" placeholder="Date_of_Friendship">
+  </div>
+  <div>
+      <button>Update</button>
+  </div>
+</form>
+
+<a href="/friends"><button>Go back</button></a>
+{% endblock %}

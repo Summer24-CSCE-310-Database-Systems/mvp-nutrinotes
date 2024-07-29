@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Your Friends!{% endblock %}
+
+{% block content %} 
+
+<h2>Your friends list</h2> 
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Date_of_Friendship</th>
+    </tr>
+    {% for Name, Date_of_Friendship in friendsList %}
+    <tr>
+        <td>{{ Name }}</td>
+        <td>{{ Date_of_Friendship }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2>Add a new friend</h2>
+
+{% if feedback_message != None %}
+    {% if feedback_type %}
+        <span style="color:green">{{feedback_message}}</span>
+    {% else %}
+    <span style="color:red">{{feedback_message}}</span>
+    {% endif %}
+{% endif %}
+
+<form action="{{ url_for('friendscreate')}}" method="post">
+    <h5>Enter the name</h5>
+    <div>
+        <input type="text" name="Name" placeholder="Name">
+    </div>
+    <div>
+        <button >Create</button>
+    </div>
+</form>
+
+<form action="{{ url_for('friends_action')}}" method="post">
+    <label for="friendsList">Select a friend</label>
+    <select name="friendsList">
+      {% for entry_ in friendsList %}
+        <option value="{{ entry_[0] }}">{{ entry_[0] }}</option>
+      {% endfor %} 
+    </select>
+    <div>
+      <button type="submit" name="f_action" value="delete"> Delete </button>
+      <button type="submit" name="f_action" value="update"> Update </button>
+    </div>
+</form>
+
+
+<a href="/"><button>Go back</button></a>
+{% endblock %}
+
