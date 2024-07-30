@@ -699,7 +699,15 @@ def is_valid_date(date_str, date_format='%Y-%m-%d'):
 #CRUD FOR Goals
 @app.route("/goals")
 def goals():
-    return render_template('goals.html')
+    try:
+        user = db.session.query(User).filter(User.Username == current_user.Username).first()
+        if user is None:
+            return render_template('goals.html', feedback_message='User not found', feedback_type=False)
+        goals = db.session.query(Goal).filter(Goal.User_ID == user.User_ID).all()
+        return render_template('goals.html', goals=goals)
+
+    except Exception as err:
+        return render_template('goals.html', feedback_message=str(err), feedback_type=False)
 
 #CREATE
 @app.route("/creategoal", methods=['POST'])
@@ -732,23 +740,25 @@ def creategoal():
         db.session.rollback()
         return render_template('goals.html', feedback_message=str(err), feedback_type=False)
 
-#DELETE
-#@app.route("/deletegoal/<int:goal_id>", methods=['POST'])
-#def deletegoal(goal_id):
-#    try:
-#        goal = db.session.query(Goals).filter(Goals.Goal_ID == goal_id).first()
-#        if goal is None:
-#            send = 'Goal ID NOT FOUND ({})'.format(goal_id)
-#            return render_template('goals.html', feedback_message=send, feedback_type=False)
-#        
-#        db.session.delete(goal)
-#        db.session.commit()
-#
-##        send = 'Goal Deleted successfully!'
-#        return redirect(url_for('goals', feedback_message=send, feedback_type=True))
-#    except Exception as err:
-#        db.session.rollback()
-#        return render_template('goals.html', feedback_message=str(err), feedback_type=False)
-#
+@app.route("/deletegoal/<int:goal_id>", methods=['POST'])
+def deletegoal(goal_id):
+    try:
+        # Query the goal using the provided goal_id
+        goal = db.session.query(Goal).filter(Goal.Goal_ID == goal_id).first()
+        
+        if goal is None:
+            send = 'Goal ID NOT FOUND ({})'.format(goal_id)
+            return render_template('goals.html', feedback_message=send, feedback_type=False)
+        
+        # Delete the goal
+        db.session.delete(goal)
+        db.session.commit()
+
+        send = 'Goal Deleted successfully!'
+        return redirect(url_for('goals', feedback_message=send, feedback_type=True))
+    except Exception as err:
+        db.session.rollback()
+        return render_template('goals.html', feedback_message=str(err), feedback_type=False)
+
 if __name__ == "__main__":
     app.run(debug=True)

@@ -62,8 +62,30 @@
     <input type="date" id="Date_of_Goal" name="Date_of_Goal" required><br><br>
     <button>Create Goal</button>
 </form>
+<hr>
 <h2>Existing Goals</h2>
-
+<table>
+    <thead>
+        <tr>
+            <th>Weight</th>
+            <th>Date of Goal</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for goal in goals %}
+        <tr>
+            <td>{{ goal.Weight }}</td>
+            <td>{{ goal.Date_of_Goal }}</td>
+            <td>
+                <form action="{{ url_for('deletegoal', goal_id=goal.Goal_ID) }}" method="post">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 <a href="/goals"><button>Go back</button></a>
 
 {% endblock %}
