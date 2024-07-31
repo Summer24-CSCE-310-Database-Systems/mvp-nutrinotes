@@ -762,3 +762,25 @@ def deletegoal(goal_id):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+#VIEW FRIENDS GOALS
+#@app.route('/friendsgoals', methods=['GET'])
+#def friendgoals():
+#    try:
+##        current_user = db.session.query(User).filter(User.Username == current_user.Username).first()
+#        if current_user is None:
+#            return render_template('goals.html', feedback_message='User not found', feedback_type=False)
+#        friends = db.session.query(Friend).filter(Friend.User_ID == current_user.User_ID).all()
+#        friend_ids = [friend.Friend_ID for friend in friends]
+#        
+#        if not friend_ids:
+#            return render_template('goals.html', feedback_message='No friends found', feedback_type=False)
+#      
+#        goals = db.session.query(Goal).filter(Goal.User_ID.in_(friend_ids)).all()
+#        
+#        friends_list = db.session.query(User).filter(User.User_ID.in_(friend_ids)).all()
+#        
+#        return render_template('goals.html', goals=goals, friends=friends_list, current_user=current_user)
+#
+#    except Exception as err:
+#        return render_template('goals.html', feedback_message=str(err), feedback_type=False)
