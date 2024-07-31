@@ -563,7 +563,7 @@ def removefoodcatalog():
         return "No record of this food in DB"
 
 # Friend
-# Create
+# Main page for friends
 @app.route("/friends")
 def friendsinfo(feedback_message=None, feedback_type=False):
 
@@ -573,10 +573,10 @@ def friendsinfo(feedback_message=None, feedback_type=False):
             feedback_message=feedback_message, 
             feedback_type=feedback_type)
 
+# CREATE
 @app.route("/friendscreate", methods=['POST'])
 def friendscreate():
     Name = request.form["Name"]
-    # Calories = request.form["Calories"]
 
     try:
         entry = Friend(User_ID=current_user.User_ID, Name=Name, Date_of_Friendship=func.now())
@@ -604,7 +604,9 @@ def readfriends():
     return friendslist
 
 
-
+# By creating this I can either press update button to update or delete to delete
+# this way I can use the same text field for multiple buttons
+# will handle whether I should do a delete or update
 @app.route('/friends_action', methods=['POST'])
 def friends_action():
 
@@ -615,12 +617,10 @@ def friends_action():
 
     if action == 'delete':
         # Logic to delete the friend
-        # For example, remove the friend from the list or database
         return friendsdelete()
     
     elif action == 'update':
-        # Logic to update the friend
-        # For example, redirect to an update page with the friend's details
+        # Redirect to logic to update the friend
         return redirect(url_for('updatefriend', friendName=friendsForm))
     
     return "Unknown action", 400
@@ -628,13 +628,15 @@ def friends_action():
 
 
 
-# Update
+# UPDATE
 @app.route("/friendupdate", methods=['POST', 'Get'])
 def friendupdate():
+    # friend name is passed through the url args because I redirect the page
     oldfriendsName = request.form.get('friendName')
     friendsName = request.form.get('Name')
     friendsDate = request.form.get('Date_of_Friendship')
 
+    # added this so I don't have to add name to change the date
     final_name = oldfriendsName
 
     try:
@@ -644,6 +646,7 @@ def friendupdate():
             msg = 'Friend {} not found.'.format(oldfriendsName)
             return friendsinfo(feedback_message=msg, feedback_type=False)
 
+        # Don't have to updarte both
         if friendsName != '':
             obj.Name = friendsName
             final_name = friendsName
@@ -688,6 +691,7 @@ def friendsdelete():
     return friendsinfo(feedback_message='Successfully deleted friend: {}'.format(friendsForm),
                        feedback_type=True)
 
+# Checks to make sure the date is valid and if not, it will not update the date
 def is_valid_date(date_str, date_format='%Y-%m-%d'):
     try:
         datetime.strptime(date_str, date_format)
