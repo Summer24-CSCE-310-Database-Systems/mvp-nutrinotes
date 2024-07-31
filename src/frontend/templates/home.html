@@ -5,6 +5,7 @@
 {% block content %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,10 +16,12 @@
             margin: 0;
             padding: 0;
         }
+
         .navbar {
             overflow: hidden;
             background-color: #333;
         }
+
         .navbar a {
             float: left;
             display: block;
@@ -29,6 +32,7 @@
         }
     </style>
 </head>
+
 <body>
     <div style="padding:20px">
         <h1>Welcome to Nutrinotes, {{current_user.Username}}!</h1>
@@ -37,14 +41,16 @@
         <a href="/">Home</a>
         <a href="/food">Add Foods!</a>
         <a href="/user">User Information for admins</a>
+        <a href="/goals">View Goals!</a>
         <a href="/friends">See your friends!</a>
         <a href="/catalog_home">Catalogs</a>
 
 
         <form action="{{url_for('logout_action')}}" method="post">
-            <button type = "submit">Logout</button>
+            <button type="submit">Logout</button>
         </form>
     </div>
 </body>
+
 </html>
 {% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}User CRUD Control{% endblock %}
+
+{% block content %}
+{% if feedback_message != None %}
+{% if feedback_type %}
+<span style="color:green">{{feedback_message}}</span>
+{% else %}
+<span style="color:red">{{feedback_message}}</span>
+{% endif %}
+{% endif %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrinotes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            overflow: hidden;
+            background-color: #333;
+        }
+
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<div style="padding:20px">
+    <h1>Here are your Goals! {{current_user.Username}}!</h1>
+</div>
+<div class="navbar">
+    <a href="/">Home</a>
+    <a href="/food">Add Foods!</a>
+    <a href="/user">User Information for admins</a>
+    <a href="/goals">View Goals!</a>
+    <a href="/friends">See your friends!</a>
+    <a href="/catalog_home">Catalogs</a>
+    <form action="{{url_for('logout_action')}}" method="post">
+        <button type="submit">Logout</button>
+    </form>
+</div>
+
+<h2>Their Goals</h2>
+<div class="dropdown">
+    <button class="dropbtn">Select Friend</button>
+    <div class="dropdown-content">
+        <!--{% for friend in friends %}
+         <a href="{{ url_for('friendgoals', friend_id=friend.User_ID) }}">{{ friend.Username }}</a>
+        {% endfor %}-->
+    </div>
+</div>
+
+<hr>
+
+<a href="/goals"><button>Go back</button></a>
+
+{% endblock %}
