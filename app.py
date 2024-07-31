@@ -11,7 +11,7 @@ from datetime import datetime
 
 app = Flask(__name__, template_folder='src/frontend/templates')
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://<user>:<password>@localhost/<appname>'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost/nutrinotes'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Little12@localhost/nutrinotes'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 login_manager = LoginManager()
@@ -720,17 +720,18 @@ def creategoal():
         send = "Please Enter All Information!"
         return render_template('goals.html', feedback_message=send, feedback_type=False)
     try:
+        #fetch the user
         user = db.session.query(User).filter(User.Username == Username).first()
         if user is None:
             send = 'USER ID NOT FOUND ({})'.format(Username)
             return render_template('goals.html', feedback_message=send, feedback_type=False)
-        
+        #add goal to database
         newGoal = Goal(
             User_ID=user.User_ID,
             Weight=float(Weight),
             Date_of_Goal=Date_of_Goal
         )
-
+        #Add the goal
         db.session.add(newGoal)
         db.session.commit()
 
