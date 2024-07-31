@@ -67,4 +67,4 @@ https://localhost:5000/
 The database will need to be populated, those actions are avalible through the application
 
 # Database Design
- ![Database Schema](docs/database.png)
+ ![Database Schema](docs/nutrinotesERD.png)
