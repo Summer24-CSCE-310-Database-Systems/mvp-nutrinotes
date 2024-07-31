@@ -16,7 +16,8 @@ table {
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
 }
 
-th, td {
+th,
+td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #ddd;
@@ -54,4 +55,9 @@ button:hover {
 
 a {
     text-decoration: none;
+}
+
+.centered-goal {
+    width: 50%;
+    margin: 0 auto;
 }

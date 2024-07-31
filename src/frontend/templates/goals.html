@@ -50,9 +50,11 @@
         <button type="submit">Logout</button>
     </form>
 </div>
+<div class="centered-goal"></div>
 <h2>
     Create A Goal!
 </h2>
+
 <form action="{{ url_for('creategoal') }}" method="post">
     <label for="username">Username:</label>
     <input type="text" id="username" name="username" required><br><br>
@@ -62,6 +64,7 @@
     <input type="date" id="Date_of_Goal" name="Date_of_Goal" required><br><br>
     <button>Create Goal</button>
 </form>
+</div>
 <hr>
 <h2>Existing Goals</h2>
 <table>
