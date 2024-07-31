@@ -445,8 +445,8 @@ def createcataloginfo(feedback_message=None, feedback_type=False):
             feedback_message=feedback_message, 
             feedback_type=feedback_type)
 
-@app.route("/catalogcreate", methods=['POST'])
-def catalogcreate():
+@app.route("/catalogcreateaction", methods=['POST'])
+def catalogcreateaction():
     name = request.form["Name"]
 
     try:
@@ -519,11 +519,11 @@ def catalogselect():
 def storecatalog():
     catalog_ID = request.form['catalog_id']
     session['current_catalog_ID'] = catalog_ID
-    return redirect(url_for('selectcatalog'))
+    return redirect(url_for('showcatalogselect'))
 
 #used to FINALLY app/remove to selected catalog
-@app.route('/selectcatalog', methods = ['GET','POST'])
-def selectcatalog():
+@app.route('/showcatalogselect', methods = ['GET','POST'])
+def showcatalogselect():
     #for adding
     catalog_ID = session.get('current_catalog_ID')
     foodlist = Food.query.all()
@@ -547,7 +547,7 @@ def addfoodcatalog():
     serving = Serving(Food_ID = food_ID, Catalog_ID = catalog_ID)
     db.session.add(serving)
     db.session.commit()
-    return redirect(url_for('selectcatalog'))
+    return redirect(url_for('showcatalogselect'))
 
 #Removing food from a catalog
 @app.route('/removefoodcatalog', methods = ['POST'])
@@ -558,7 +558,7 @@ def removefoodcatalog():
     if serving:
         db.session.delete(serving)
         db.session.commit()
-        return redirect(url_for('selectcatalog'))
+        return redirect(url_for('showcatalogselect'))
     else:
         return "No record of this food in DB"
 
