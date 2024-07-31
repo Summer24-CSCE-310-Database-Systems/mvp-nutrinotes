@@ -740,6 +740,7 @@ def creategoal():
         db.session.rollback()
         return render_template('goals.html', feedback_message=str(err), feedback_type=False)
 
+#DELETE
 @app.route("/deletegoal/<int:goal_id>", methods=['POST'])
 def deletegoal(goal_id):
     try:
@@ -759,9 +760,40 @@ def deletegoal(goal_id):
     except Exception as err:
         db.session.rollback()
         return render_template('goals.html', feedback_message=str(err), feedback_type=False)
-
-if __name__ == "__main__":
-    app.run(debug=True)
+#UPDATE
+@app.route("/updategoal/<int:goal_id>", methods=['GET', 'POST'])
+def updategoal(goal_id):
+    try:
+        # Fetch the goal to update
+        goal = db.session.query(Goal).filter(Goal.Goal_ID == goal_id).first()
+        
+        if goal is None:
+            send = 'Goal ID NOT FOUND ({})'.format(goal_id)
+            return render_template('goals.html', feedback_message=send, feedback_type=False)
+        
+        if request.method == 'POST':
+            # Get updated data from the form
+            Weight = request.form.get("Weight")
+            Date_of_Goal = request.form.get("Date_of_Goal")
+            
+            if not Weight or not Date_of_Goal:
+                send = "Please Enter All Information!"
+                return render_template('updategoal.html', goal=goal, feedback_message=send, feedback_type=False)
+            
+            # Update goal
+            goal.Weight = float(Weight)
+            goal.Date_of_Goal = Date_of_Goal
+            
+            db.session.commit()
+            
+            send = 'Goal Updated successfully!'
+            return redirect(url_for('goals', feedback_message=send, feedback_type=True))
+        
+        return render_template('updategoal.html', goal=goal)
+    
+    except Exception as err:
+        db.session.rollback()
+        return render_template('goals.html', feedback_message=str(err), feedback_type=False)
 
 #VIEW FRIENDS GOALS
 #@app.route('/friendsgoals', methods=['GET'])
