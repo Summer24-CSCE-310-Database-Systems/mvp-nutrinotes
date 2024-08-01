@@ -41,6 +41,7 @@ This code has been run on
 
 ## VIEW THE APP ONLINE
 https://github-setup-nutrinotes.onrender.com/login
+(it may take up to 50s to load if the website has not been used in a while because render.com will put it to sleep)
 
 ##Installation
 
